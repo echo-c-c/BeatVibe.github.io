@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员面板</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, 
+                #FF69B4 0%,    /* 粉色 */
+                #87CEEB 50%,   /* 天蓝色 */
+                #9370DB 100%); /* 紫色 */
+            color: white;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(147, 112, 219, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .users-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .actions button {
+            background: rgba(255, 105, 180, 0.3);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .actions button:hover {
+            background: rgba(147, 112, 219, 0.4);
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 105, 180, 0.3);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(147, 112, 219, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Add new styles for edit mode */
+        .edit-mode input {
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 80%;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-actions button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .cancel-btn {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .edit-btn {
+            background: rgba(33, 150, 243, 0.3);
+        }
+
+        .save-btn:hover, .cancel-btn:hover, .edit-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>管理员面板</h1>
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>总用户数</h3>
+                <p>{{ total_users }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>今日新增用户</h3>
+                <p>{{ today_users }}</p>
+            </div>
+        </div>
+
+        <div class="users-table">
+            <h2>用户列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>密码</th>
+                        <th>注册时间</th>
+                        <th>最高分数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr id="user-row-{{ user[0] }}">
+                        <td>{{ user[0] }}</td>
+                        <td class="editable" data-field="username">{{ user[1] }}</td>
+                        <td class="editable" data-field="password">******</td>
+                        <td class="editable" data-field="register_date">{{ user[3] }}</td>
+                        <td class="editable" data-field="high_score">{{ user[4] }}</td>
+                        <td class="actions">
+                            <button 
+                                type="button" 
+                                class="delete-btn"
+                                data-user-id="{{ user[0] }}"
+                            >删除</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button id="mainEditButton" class="edit-btn" style="margin-top: 20px;">编辑用户数据</button>
+        </div>
+    </div>
+
+    <script>
+        let isEditing = false;
+
+        // 主编辑按钮点击事件
+        document.getElementById('mainEditButton').addEventListener('click', function() {
+            isEditing = !isEditing;
+            const editButton = document.getElementById('mainEditButton');
+            const rows = document.querySelectorAll('tr[id^="user-row-"]');
+            
+            if (isEditing) {
+                // 进入编辑模式
+                editButton.textContent = '保存更改';
+                editButton.style.background = 'rgba(76, 175, 80, 0.3)'; // 绿色背景
+                
+                rows.forEach(row => {
+                    const editableCells = row.getElementsByClassName('editable');
+                    Array.from(editableCells).forEach(cell => {
+                        const currentValue = cell.textContent;
+                        const fieldName = cell.dataset.field;
+                        const isPassword = fieldName === 'password';
+                        
+                        cell.innerHTML = `
+                            <input type="${isPassword ? 'password' : 'text'}" 
+                                   value="${isPassword ? '' : currentValue}"
+                                   placeholder="${isPassword ? '不修改请留空' : ''}"
+                                   data-original="${currentValue}">
+                        `;
+                    });
+                });
+            } else {
+                // 保存更改
+                if (confirm('确定要保存所有更改吗？')) {
+                    saveAllChanges();
+                } else {
+                    cancelEdit();
+                }
+            }
+        });
+
+        async function saveAllChanges() {
+            const rows = document.querySelectorAll('tr[id^="user-row-"]');
+            const updates = [];
+
+            rows.forEach(row => {
+                const userId = row.id.replace('user-row-', '');
+                const inputs = row.getElementsByTagName('input');
+                const userData = {};
+                let hasChanges = false;
+
+                Array.from(inputs).forEach(input => {
+                    const fieldName = input.closest('.editable').dataset.field;
+                    const value = input.value.trim();
+                    if (value !== '' && value !== input.dataset.original) {
+                        userData[fieldName] = value;
+                        hasChanges = true;
+                    }
+                });
+
+                if (hasChanges) {
+                    updates.push({ userId, userData });
+                }
+            });
+
+            try {
+                // 修改：添加响应类型验证
+                for (const update of updates) {
+                    const response = await fetch(`/update_user/${update.userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json' // 添加Accept头
+                        },
+                        body: JSON.stringify(update.userData)
+                    });
+
+                    // 检查响应类型
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('服务器响应格式错误');
+                    }
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || `更新用户 ${update.userId} 失败`);
+                    }
+                }
+
+                // 成功后直接刷新页面，不显示确认框
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('保存更改失败: ' + error.message);
+                cancelEdit();
+            }
+        }
+
+        function cancelEdit() {
+            const editButton = document.getElementById('mainEditButton');
+            editButton.textContent = '编辑用户数据';
+            editButton.style.background = 'rgba(33, 150, 243, 0.3)'; // 恢复原始颜色
+            
+            const rows = document.querySelectorAll('tr[id^="user-row-"]');
+            rows.forEach(row => {
+                const editableCells = row.getElementsByClassName('editable');
+                Array.from(editableCells).forEach(cell => {
+                    const input = cell.querySelector('input');
+                    cell.textContent = input.dataset.original;
+                });
+            });
+            
+            isEditing = false;
+        }
+
+        async function deleteUser(userId) {
+            if (confirm('确定要删除这个用户吗？')) {
+                try {
+                    const response = await fetch(`/delete_user/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('删除失败');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                }
+            }
+        }
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                window.location.href = 'http://127.0.0.1:5000/';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有删除按钮添加事件监听
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    deleteUser(userId);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

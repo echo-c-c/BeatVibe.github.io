@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, 
+                #FF69B4 0%,    /* 粉色 */
+                #87CEEB 50%,   /* 天蓝色 */
+                #9370DB 100%)  /* 紫色 */
+            !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(147, 112, 219, 0.3),
+                       0 0 0 1px rgba(255, 255, 255, 0.1);
+            width: 380px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(65, 105, 225, 0.3),
+                       0 0 0 1px rgba(255, 255, 255, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(65, 105, 225, 0.4),
+                       0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h2:after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 10px auto;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        input:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, 
+                rgba(255, 105, 180, 0.4), 
+                rgba(147, 112, 219, 0.4)
+            );
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: rgba(65, 105, 225, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(65, 105, 225, 0.4);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: buttonShine 3s infinite;
+        }
+
+        @keyframes buttonShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .role-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .switch-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        .switch-btn.active {
+            background: rgba(65, 105, 225, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(65, 105, 225, 0.3);
+        }
+
+        .switch-btn:hover:not(.active) {
+            background: rgba(65, 105, 225, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .auth-switch a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .auth-switch a:hover {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .form-container {
+            transition: all 0.3s ease;
+        }
+
+        .register-form {
+            display: none; /* 默认隐藏注册表单 */
+        }
+
+        /* 添加表单切换动画 */
+        .form-container.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .form-container.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success-message {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 添加音符动画元素 */
+        .music-notes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .note {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: floatNote 8s linear infinite;
+        }
+
+        .note::before {
+            content: '♪';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 20px;
+        }
+
+        @keyframes floatNote {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 32px rgba(65, 105, 225, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1); }
+            50% { box-shadow: 0 8px 32px rgba(65, 105, 225, 0.5), 0 0 20px rgba(255, 255, 255, 0.3); }
+            100% { box-shadow: 0 8px 32px rgba(65, 105, 225, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1); }
+        }
+
+        /* Add styles for the loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+            z-index: 1000;
+            display: none; /* Initially hidden */
+        }
+
+        .progress-bar-container {
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b); /* Updated color gradient */
+            transition: width 0.5s ease; /* Smoother transition */
+        }
+
+        /* 添加排行榜相关样式 */
+        .leaderboard-btn {
+            position: fixed;  /* 改为fixed以确保始终在视窗右上角 */
+            top: 20px;
+            right: 20px;
+            width: 40px;  /* 固定宽度 */
+            height: 40px;  /* 固定高度 */
+            padding: 0;  /* 移除内边距 */
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;  /* 圆形 */
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            font-size: 1.2rem;  /* 调整图标大小 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;  /* 确保按钮始终在最上层 */
+        }
+
+        .leaderboard-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+        }
+
+        .leaderboard-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(65, 105, 225, 0.4);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .leaderboard-title {
+            color: white;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 18px 18px 0 0;
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .leaderboard-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            align-items: center;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .leaderboard-rank {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .leaderboard-name {
+            font-weight: 500;
+            text-align: left;
+            padding: 0 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .leaderboard-score {
+            text-align: right;
+            font-weight: 600;
+            color: #87CEEB;
+        }
+
+        /* 添加音乐元素动画 */
+        .music-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .music-element {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: floatElement 10s linear infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes floatElement {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 添加滚动条样式 */
+        .leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .leaderboard-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .game-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        .game-title h1 {
+            font-size: 3.5em;
+            color: white;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+                         0 0 20px rgba(255, 255, 255, 0.3),
+                         0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .game-title .subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        登录成功，正在跳转...
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- 添加音符动画容器 -->
+    <div class="music-notes" id="musicNotes"></div>
+    
+    <!-- 在 body 开始处添加音乐元素容器 -->
+    <div class="music-elements" id="musicElements"></div>
+    
+    <div class="container">
+        <div class="game-title">
+            <h1>BeatVibe</h1>
+            <p class="subtitle">Feel the Rhythm, Create the Vibe</p>
+        </div>
+        <div class="form-container login-form">
+            <h2>登录</h2>
+            {% if error %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            
+            <div class="role-switch">
+                <button type="button" class="switch-btn active" onclick="switchRole('user')">玩家</button>
+                <button type="button" class="switch-btn" onclick="switchRole('admin')">管理员</button>
+            </div>
+
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="用户名" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="密码" required>
+                </div>
+                <input type="hidden" name="role" id="roleInput" value="user">
+                <button type="submit">登录</button>
+            </form>
+
+            <div class="auth-switch">
+                还没有账号？ <a onclick="toggleForms()">立即注册</a>
+            </div>
+        </div>
+
+        <div class="form-container register-form">
+            <h2>注册</h2>
+            <div id="registerSuccess" class="success-message" style="display: none;">
+                注册成功！即将返回登录页面...
+            </div>
+            <form action="/register" method="post" onsubmit="return handleRegister(event)">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="用户名" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="密码" required>
+                </div>
+                <button type="submit">注册</button>
+            </form>
+
+            <div class="auth-switch">
+                已有有账号？ <a onclick="toggleForms()">返回登录</a>
+            </div>
+        </div>
+    </div>
+
+    <button class="leaderboard-btn" onclick="showLeaderboard()">🏆</button>
+
+    <div class="leaderboard-overlay" id="leaderboardOverlay"></div>
+    <div class="leaderboard-modal" id="leaderboardModal">
+        <button class="close-btn" onclick="hideLeaderboard()">&times;</button>
+        <h3 class="leaderboard-title">游戏排行榜</h3>
+        <ul class="leaderboard-list" id="leaderboardList">
+            <!-- 排行榜数据将通过 JavaScript 动态添加 -->
+        </ul>
+    </div>
+
+    <script>
+        function toggleForms() {
+            const loginForm = document.querySelector('.login-form');
+            const registerForm = document.querySelector('.register-form');
+            
+            // 添加淡出动画
+            if (loginForm.style.display !== 'none') {
+                loginForm.classList.add('fade-out');
+                setTimeout(() => {
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                    // 触发重排后添加淡入动画
+                    setTimeout(() => registerForm.classList.add('fade-in'), 50);
+                }, 300);
+            } else {
+                registerForm.classList.add('fade-out');
+                setTimeout(() => {
+                    registerForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                    // 触发重排后添加淡入动画
+                    setTimeout(() => loginForm.classList.add('fade-in'), 50);
+                }, 300);
+            }
+        }
+
+        function switchRole(role) {
+            const buttons = document.querySelectorAll('.switch-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('roleInput').value = role;
+        }
+
+        // 修改登录表单提交处理部分
+        document.querySelector('.login-form form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show loading overlay
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+
+                    // Simulate progress bar
+                    const progressBar = document.getElementById('progressBar');
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        progressBar.style.width = `${progress}%`;
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            // 修改跳转地址
+                            if (formData.get('role') === 'admin') {
+                                window.location.href = '/admin';
+                            } else {
+                                const username = formData.get('name');
+                                const score = data.score || 0;
+                                // 修改为正确的游戏页面地址
+                                window.location.href = `http://localhost:8080/rhythm-game/index.html?username=${encodeURIComponent(username)}&score=${score}`;
+                            }
+                        }
+                    }, 100);
+                } else {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    errorDiv.textContent = data.message || 'Login failed';
+                    document.querySelector('.login-form').insertBefore(
+                        errorDiv, 
+                        document.querySelector('.login-form form')
+                    );
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+            }
+        });
+
+        // 页面加载完成后立即执行
+        document.addEventListener('DOMContentLoaded', () => {
+            // 只创建音符动画，保留原始背景
+            createMusicNotes();
+            createMusicElements();
+        });
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 显示成功消息
+                    const successMessage = document.getElementById('registerSuccess');
+                    successMessage.style.display = 'block';
+                    form.style.display = 'none';  // 隐藏表单
+                    
+                    // 2秒后切换回登录页面
+                    setTimeout(() => {
+                        const loginForm = document.querySelector('.login-form');
+                        const registerForm = document.querySelector('.register-form');
+                        
+                        registerForm.classList.add('fade-out');
+                        setTimeout(() => {
+                            registerForm.style.display = 'none';
+                            form.style.display = 'block';  // 复表单显示
+                            successMessage.style.display = 'none';  // 隐藏成功消息
+                            loginForm.style.display = 'block';
+                            setTimeout(() => loginForm.classList.add('fade-in'), 50);
+                        }, 300);
+                    }, 2000);
+                } else {
+                    // 显示错误消息
+                    alert(data.message || '注册失败，请重试');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('注册失败，请重试');
+            }
+
+            return false;
+        }
+
+        // 添加音符动画
+        function createMusicNotes() {
+            const container = document.getElementById('musicNotes');
+            const noteTypes = ['♪', '♫', '♬', '♩'];
+            
+            setInterval(() => {
+                const note = document.createElement('div');
+                note.className = 'note';
+                note.style.left = Math.random() * 100 + 'vw';
+                note.style.animationDuration = (6 + Math.random() * 4) + 's';
+                container.appendChild(note);
+
+                // 动画结束后移除音符
+                setTimeout(() => {
+                    note.remove();
+                }, 8000);
+            }, 500);
+        }
+
+        async function showLeaderboard() {
+            try {
+                const response = await fetch('/leaderboard');
+                const data = await response.json();
+                
+                const leaderboardList = document.getElementById('leaderboardList');
+                leaderboardList.innerHTML = ''; // 清空现有列表
+                
+                data.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'leaderboard-item';
+                    li.innerHTML = `
+                        <span class="leaderboard-rank">#${index + 1}</span>
+                        <span class="leaderboard-name">${item.username}</span>
+                        <span class="leaderboard-score">${item.score}分</span>
+                    `;
+                    leaderboardList.appendChild(li);
+                });
+                
+                document.getElementById('leaderboardModal').style.display = 'block';
+                document.getElementById('leaderboardOverlay').style.display = 'block';
+            } catch (error) {
+                console.error('获取排行榜数据失败:', error);
+            }
+        }
+
+        function hideLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+            document.getElementById('leaderboardOverlay').style.display = 'none';
+        }
+
+        // 点击遮罩层关闭排行榜
+        document.getElementById('leaderboardOverlay').addEventListener('click', hideLeaderboard);
+
+        function createMusicElements() {
+            const container = document.getElementById('musicElements');
+            // 音乐元素：包括音符和乐器
+            const elements = [
+                '🎵', '🎶', '♪', '♫',  // 音
+                '🎸', '🎹', '🎺', '🎻',  // 乐器
+                '🥁', '🎷', '🪗', '🎼'   // 更多乐
+            ];
+            
+            setInterval(() => {
+                const element = document.createElement('div');
+                element.className = 'music-element';
+                // 随机选择一个音乐元素
+                element.innerHTML = elements[Math.floor(Math.random() * elements.length)];
+                // 随机位置
+                element.style.left = Math.random() * 100 + 'vw';
+                // 随机大小 (30-50px)
+                const size = 30 + Math.random() * 20;
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                // 随机动画时间 (8-12s)
+                element.style.animationDuration = (8 + Math.random() * 4) + 's';
+                container.appendChild(element);
+
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    element.remove();
+                }, 10000);
+            }, 800);  // 每800ms创建一个新元素
+        }
+    </script>
+</body>
+</html> 
