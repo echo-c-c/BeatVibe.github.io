@@ -44,7 +44,7 @@
 1. 克隆项目到本地：
 
 ```bash
-git clone [项目地址]
+git clone [https://github.com/echo-c-c/BeatVibe.github.io.git]
 ```
 
 2. 安装所需的Python包：
